@@ -11,6 +11,8 @@
   .mark-pop { animation: pop 160ms ease-out; }
   @keyframes pulse-win { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0.15); } }
   .win-pulse { animation: pulse-win 1.4s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-ring { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #cbd5e1; border-top-color: #64748b; animation: spin 0.8s linear infinite; }
   .frame-label { font-family: ui-monospace, monospace; }
 </style>
 </head>
@@ -125,6 +127,8 @@
             <span class="text-sm font-semibold text-emerald-700">Player O's turn</span>
           </div>
 
+          <button class="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-600 py-0.5">Change mode</button>
+
           <!-- Scoreboard (game) -->
           <div class="rounded-xl border border-slate-200 p-4 grid grid-cols-3 text-center gap-2">
             <div>
@@ -164,15 +168,12 @@
       <div class="w-[375px] border border-slate-300 rounded-3xl p-4 space-y-4 bg-slate-50">
         <div class="flex items-center justify-between">
           <h1 class="text-lg font-bold text-slate-900">Tic Tac Toe</h1>
-          <span class="text-[11px] font-medium text-slate-400">Unbeatable</span>
+          <span class="text-[11px] font-medium text-slate-400">vs AI · Unbeatable</span>
         </div>
 
         <!-- AIThinkingBadge (src/features/ai) -->
         <div class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 flex items-center gap-2">
-          <svg class="animate-spin h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
+          <span class="spinner-ring shrink-0"></span>
           <span class="text-sm font-semibold text-slate-600">AI is thinking…</span>
         </div>
 
