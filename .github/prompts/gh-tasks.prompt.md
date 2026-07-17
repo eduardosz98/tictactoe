@@ -1,5 +1,5 @@
 ---
-mode: product-engineer
+agent: product-engineer
 description: Break down a PRD/tech-spec GitHub issue (epic) into concrete [Task] issues on the project board.
 ---
 # /gh-tasks

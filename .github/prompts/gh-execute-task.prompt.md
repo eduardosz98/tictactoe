@@ -1,5 +1,5 @@
 ---
-mode: product-engineer
+agent: product-engineer
 description: Implement a single [Task] GitHub issue end-to-end and open a PR that closes it, using the issue + its parent epic as the only source of truth.
 ---
 # /gh-execute-task

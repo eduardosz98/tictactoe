@@ -11,16 +11,17 @@ issue, and its lifecycle is tracked on the project board.
 
 ## Agents
 
-Each stage of the pipeline is owned by a dedicated custom chat mode in
-`.github/chatmodes/`. Prompt files declare `mode: <name>` so Copilot switches
-persona automatically when you run the slash command.
+Each stage of the pipeline is owned by a dedicated custom agent in
+`.github/agents/` (`.agent.md` files). Prompt files declare `agent: <name>` in
+their frontmatter so Copilot switches persona automatically when you run the
+slash command.
 
-| Agent | Chat mode file | Owns |
+| Agent | Agent file | Owns |
 |---|---|---|
-| **Product Manager** | `product-manager.chatmode.md` | `/gh-idea`, `/gh-prd` |
-| **Design Engineer** (runs on Claude) | `design-engineer.chatmode.md` | `/gh-design` |
-| **Product Engineer** | `product-engineer.chatmode.md` | `/gh-techspec`, `/gh-tasks`, `/gh-execute-task` |
-| **Quality Engineer** | `quality-engineer.chatmode.md` | `/gh-qa` |
+| **Product Manager** | `product-manager.agent.md` | `/gh-idea`, `/gh-prd` |
+| **Design Engineer** (runs on Claude) | `design-engineer.agent.md` | `/gh-design` |
+| **Product Engineer** | `product-engineer.agent.md` | `/gh-techspec`, `/gh-tasks`, `/gh-execute-task` |
+| **Quality Engineer** | `quality-engineer.agent.md` | `/gh-qa` |
 
 ## Pipeline
 

@@ -1,5 +1,5 @@
 ---
-mode: design-engineer
+agent: design-engineer
 description: Turn a [PRD] GitHub issue into a UI/UX design spec plus a real HTML/CSS prototype, using Claude for design reasoning.
 ---
 # /gh-design

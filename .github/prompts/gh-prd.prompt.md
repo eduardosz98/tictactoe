@@ -1,5 +1,5 @@
 ---
-mode: product-manager
+agent: product-manager
 description: Expand an existing [Idea] GitHub issue into a full PRD by rewriting that same issue in place.
 ---
 # /gh-prd

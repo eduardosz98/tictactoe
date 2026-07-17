@@ -1,5 +1,5 @@
 ---
-mode: quality-engineer
+agent: quality-engineer
 description: Verify a [Task] issue's PR against its acceptance criteria and design spec, then approve and mark it Done.
 ---
 # /gh-qa

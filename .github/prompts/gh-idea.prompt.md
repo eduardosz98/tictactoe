@@ -1,5 +1,5 @@
 ---
-mode: product-manager
+agent: product-manager
 description: Brainstorm a new product idea and create it as a tracked GitHub issue (single source of truth) on the project board.
 ---
 # /gh-idea

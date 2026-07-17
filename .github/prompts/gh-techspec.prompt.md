@@ -1,5 +1,5 @@
 ---
-mode: product-engineer
+agent: product-engineer
 description: Append a Technical Specification section to an existing [PRD] GitHub issue.
 ---
 # /gh-techspec
