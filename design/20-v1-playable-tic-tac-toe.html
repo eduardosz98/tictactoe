@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#20 — v1 Playable Tic Tac Toe — Design Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* Custom styles only for animations, per project convention */
+  @keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .mark-pop { animation: pop 160ms ease-out; }
+  @keyframes pulse-win { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0.15); } }
+  .win-pulse { animation: pulse-win 1.4s ease-in-out infinite; }
+  .frame-label { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+<!-- ============================================================ -->
+<!-- PROTOTYPE NAV — not part of the app, just for reviewing states -->
+<!-- ============================================================ -->
+<nav class="sticky top-0 z-50 bg-slate-900 text-slate-100 px-4 py-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+  <span class="font-semibold text-emerald-400">#20 Prototype —</span>
+  <a href="#state-idle" class="hover:text-emerald-300">Idle / Mode Select</a>
+  <a href="#state-progress-2p" class="hover:text-emerald-300">In-progress (2P)</a>
+  <a href="#state-progress-ai" class="hover:text-emerald-300">AI Thinking</a>
+  <a href="#state-win" class="hover:text-emerald-300">Win</a>
+  <a href="#state-draw" class="hover:text-emerald-300">Draw</a>
+  <a href="#state-responsive" class="hover:text-emerald-300">Mobile vs Desktop</a>
+</nav>
+
+<main class="max-w-6xl mx-auto px-4 py-10 space-y-20">
+
+  <!-- ============================================================ -->
+  <!-- STATE: IDLE / MODE SELECT MODAL -->
+  <!-- ============================================================ -->
+  <section id="state-idle">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">State: idle — mode select modal</h2>
+    <div class="relative bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 min-h-[480px] flex items-center justify-center">
+      <!-- Backdrop app shell, dimmed -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
+        <div class="grid grid-cols-3 gap-2 w-64">
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+          <div class="aspect-square bg-slate-100 rounded-lg"></div>
+        </div>
+      </div>
+
+      <!-- ModeSelectModal (src/features/settings) -->
+      <div class="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
+        <h3 class="text-lg font-bold text-slate-900">New game</h3>
+        <p class="text-sm text-slate-500 mt-1">Choose how you want to play.</p>
+
+        <!-- ModeToggle -->
+        <div class="mt-5 grid grid-cols-2 gap-2" role="tablist" aria-label="Game mode">
+          <button class="rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold py-3 text-sm">
+            2 Players
+          </button>
+          <button class="rounded-xl border-2 border-slate-200 text-slate-600 font-semibold py-3 text-sm hover:border-slate-300">
+            vs AI
+          </button>
+        </div>
+
+        <!-- DifficultySelector (src/features/ai) — shown only when "vs AI" is active -->
+        <div class="mt-4 opacity-40">
+          <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">AI difficulty</label>
+          <div class="mt-2 grid grid-cols-3 gap-2">
+            <button class="rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-500">Easy</button>
+            <button class="rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-500">Medium</button>
+            <button class="rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-500">Unbeatable</button>
+          </div>
+        </div>
+
+        <button class="mt-6 w-full rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 text-sm shadow-sm">
+          Start game
+        </button>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-slate-500 max-w-2xl">
+      <strong>Rationale:</strong> mode + difficulty are chosen up-front in a modal
+      (matches <code>src/features/settings</code>) so the board only ever renders
+      one unambiguous state. Difficulty options are disabled/dimmed until "vs AI"
+      is selected to keep the control's relevance obvious.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- STATE: IN-PROGRESS — 2 PLAYER, DESKTOP -->
+  <!-- ============================================================ -->
+  <section id="state-progress-2p">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">State: in-progress — 2 players (desktop layout)</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10">
+      <div class="flex flex-col md:flex-row gap-8 items-start justify-center">
+
+        <!-- Board (src/features/board) -->
+        <div class="grid grid-cols-3 gap-3 w-full max-w-sm shrink-0">
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-5xl font-bold text-emerald-600">X</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-5xl font-bold text-sky-600">O</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center"></button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-5xl font-bold text-sky-600">O</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-5xl font-bold text-emerald-600">X</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center"></button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center"></button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center"></button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 flex items-center justify-center"></button>
+        </div>
+
+        <!-- SidePanel (ui) -->
+        <div class="w-full md:w-64 space-y-4">
+          <!-- Header (ui) -->
+          <div class="flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-900">Tic Tac Toe</h1>
+            <button class="text-xs font-medium text-slate-400 hover:text-slate-600">Reset score</button>
+          </div>
+
+          <!-- TurnIndicator (game) -->
+          <div class="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span class="text-sm font-semibold text-emerald-700">Player O's turn</span>
+          </div>
+
+          <!-- Scoreboard (game) -->
+          <div class="rounded-xl border border-slate-200 p-4 grid grid-cols-3 text-center gap-2">
+            <div>
+              <div class="text-2xl font-bold text-emerald-600">3</div>
+              <div class="text-xs text-slate-500">X wins</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-700">1</div>
+              <div class="text-xs text-slate-500">Draws</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-sky-600">2</div>
+              <div class="text-xs text-slate-500">O wins</div>
+            </div>
+          </div>
+
+          <button class="w-full rounded-xl border border-slate-200 text-slate-500 font-medium py-2.5 text-sm" disabled>
+            New round (available on win/draw)
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-slate-500 max-w-2xl">
+      <strong>Rationale:</strong> board and side panel sit side-by-side on desktop
+      (<code>md:flex-row</code>) so the scoreboard and turn state are always
+      visible without scrolling. Board cells use <code>aspect-square</code> so the
+      grid stays a perfect 3×3 at any width.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- STATE: AI THINKING (mobile layout, single column) -->
+  <!-- ============================================================ -->
+  <section id="state-progress-ai">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">State: AI-thinking — vs AI mode (mobile layout, 375px frame)</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex justify-center">
+      <div class="w-[375px] border border-slate-300 rounded-3xl p-4 space-y-4 bg-slate-50">
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg font-bold text-slate-900">Tic Tac Toe</h1>
+          <span class="text-[11px] font-medium text-slate-400">Unbeatable</span>
+        </div>
+
+        <!-- AIThinkingBadge (src/features/ai) -->
+        <div class="rounded-xl bg-slate-100 border border-slate-200 px-4 py-3 flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span class="text-sm font-semibold text-slate-600">AI is thinking…</span>
+        </div>
+
+        <!-- Board disabled while AI moves -->
+        <div class="grid grid-cols-3 gap-2 opacity-60 pointer-events-none">
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center text-3xl font-bold text-sky-600">O</div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+          <div class="aspect-square rounded-lg bg-white border border-slate-200 flex items-center justify-center"></div>
+        </div>
+
+        <div class="grid grid-cols-3 text-center gap-2 text-xs">
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-emerald-600">2</div>
+            <div class="text-slate-500">You</div>
+          </div>
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-slate-700">0</div>
+            <div class="text-slate-500">Draws</div>
+          </div>
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-sky-600">1</div>
+            <div class="text-slate-500">AI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-slate-500 max-w-2xl">
+      <strong>Rationale:</strong> the board becomes non-interactive
+      (<code>pointer-events-none</code> + dimmed) the instant it's the AI's turn so
+      players can't queue clicks while <code>getBestMove</code> runs. On mobile,
+      panel and board stack in a single column with no horizontal scroll at 375px.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- STATE: WIN (desktop, winning line highlighted) -->
+  <!-- ============================================================ -->
+  <section id="state-win">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">State: win — winning line highlighted (desktop)</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10">
+      <div class="flex flex-col md:flex-row gap-8 items-start justify-center">
+
+        <div class="grid grid-cols-3 gap-3 w-full max-w-sm shrink-0">
+          <button class="win-pulse aspect-square rounded-xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-5xl font-bold text-emerald-700">X</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-5xl font-bold text-sky-600">O</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-5xl font-bold text-sky-600">O</button>
+          <button class="win-pulse aspect-square rounded-xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-5xl font-bold text-emerald-700">X</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-5xl font-bold text-sky-600">O</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center"></button>
+          <button class="win-pulse aspect-square rounded-xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-5xl font-bold text-emerald-700">X</button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center"></button>
+          <button class="aspect-square rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center"></button>
+        </div>
+
+        <div class="w-full md:w-64 space-y-4">
+          <div class="flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-900">Tic Tac Toe</h1>
+            <button class="text-xs font-medium text-slate-400 hover:text-slate-600">Reset score</button>
+          </div>
+
+          <!-- GameStatusBanner (game) — win variant -->
+          <div class="rounded-xl bg-emerald-500 px-4 py-3 text-white shadow-sm">
+            <div class="text-sm font-bold">🎉 Player X wins!</div>
+            <div class="text-xs text-emerald-50 mt-0.5">Winning line: top-left → center → bottom-left</div>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 grid grid-cols-3 text-center gap-2">
+            <div>
+              <div class="text-2xl font-bold text-emerald-600">4</div>
+              <div class="text-xs text-slate-500">X wins</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-700">1</div>
+              <div class="text-xs text-slate-500">Draws</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-sky-600">2</div>
+              <div class="text-xs text-slate-500">O wins</div>
+            </div>
+          </div>
+
+          <button class="w-full rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 text-sm shadow-sm">
+            New round
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-slate-500 max-w-2xl">
+      <strong>Rationale:</strong> the three winning cells get a shared
+      <code>emerald-100</code>/<code>emerald-400</code> treatment plus a subtle
+      pulse (custom keyframes, per the "custom styles only for animations"
+      convention) so the win reads instantly, satisfying the "highlighted within
+      300ms" acceptance criterion. The banner names the winner and line in text
+      for accessibility (not just color).
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- STATE: DRAW (mobile) -->
+  <!-- ============================================================ -->
+  <section id="state-draw">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">State: draw (mobile layout, 375px frame)</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex justify-center">
+      <div class="w-[375px] border border-slate-300 rounded-3xl p-4 space-y-4 bg-slate-50">
+        <div class="flex items-center justify-between">
+          <h1 class="text-lg font-bold text-slate-900">Tic Tac Toe</h1>
+          <button class="text-xs font-medium text-slate-400">Reset score</button>
+        </div>
+
+        <!-- GameStatusBanner (game) — draw variant -->
+        <div class="rounded-xl bg-slate-200 px-4 py-3 text-slate-700">
+          <div class="text-sm font-bold">Draw</div>
+          <div class="text-xs text-slate-500 mt-0.5">No cells left — nobody wins this round.</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-sky-600">O</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-sky-600">O</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-sky-600">O</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-sky-600">O</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+          <div class="aspect-square rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-3xl font-bold text-emerald-600">X</div>
+        </div>
+
+        <div class="grid grid-cols-3 text-center gap-2 text-xs">
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-emerald-600">4</div>
+            <div class="text-slate-500">X wins</div>
+          </div>
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-slate-700">2</div>
+            <div class="text-slate-500">Draws</div>
+          </div>
+          <div class="rounded-lg bg-white border border-slate-200 py-2">
+            <div class="font-bold text-sky-600">2</div>
+            <div class="text-slate-500">O wins</div>
+          </div>
+        </div>
+
+        <button class="w-full rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 text-sm shadow-sm">
+          New round
+        </button>
+      </div>
+    </div>
+    <p class="mt-3 text-sm text-slate-500 max-w-2xl">
+      <strong>Rationale:</strong> draw uses a distinct neutral <code>slate</code>
+      banner (rather than reusing the win's emerald) so the two end states are
+      never visually confused, per acceptance criterion 5.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- RESPONSIVE COMPARISON -->
+  <!-- ============================================================ -->
+  <section id="state-responsive">
+    <h2 class="frame-label text-xs uppercase tracking-wide text-slate-500 mb-3">Responsive: 375px (mobile, single column) vs 1440px (desktop, side-by-side)</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 space-y-6">
+      <p class="text-sm text-slate-600 max-w-3xl">
+        Breakpoint used: Tailwind's <code>md</code> (≥768px). Below <code>md</code>
+        the layout is a single column (board, then turn indicator, then
+        scoreboard, then actions) with no horizontal scroll. At <code>md</code>
+        and above, board and side panel sit side-by-side with a fixed
+        <code>w-64</code> side panel, matching the 2P and win-state frames above.
+      </p>
+      <div class="flex flex-wrap items-end gap-6">
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-[188px] border-2 border-slate-300 rounded-2xl p-3 bg-slate-50 space-y-2">
+            <div class="h-4 w-16 bg-slate-300 rounded"></div>
+            <div class="grid grid-cols-3 gap-1">
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+            </div>
+            <div class="h-8 bg-slate-200 rounded"></div>
+            <div class="h-10 bg-slate-200 rounded"></div>
+          </div>
+          <span class="frame-label text-xs text-slate-400">375px — single column</span>
+        </div>
+
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-[420px] border-2 border-slate-300 rounded-2xl p-4 bg-slate-50">
+            <div class="h-4 w-24 bg-slate-300 rounded mb-3"></div>
+            <div class="flex gap-3">
+              <div class="grid grid-cols-3 gap-1 w-48">
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+                <div class="aspect-square bg-white border border-slate-200 rounded"></div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <div class="h-8 bg-slate-200 rounded"></div>
+                <div class="h-12 bg-slate-200 rounded"></div>
+                <div class="h-10 bg-slate-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+          <span class="frame-label text-xs text-slate-400">1440px (scaled) — side-by-side</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>
